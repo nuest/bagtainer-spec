@@ -1,0 +1,144 @@
+\documentclass[twoside,a4paper]{refart}
+%\documentclass[pagesize,twoside,a5paper,smallborder,10pt]{refart}
+
+% example: https://de.sharelatex.com/project/56d7250dc2b46eb00522b9c6
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[]{hyperref}
+\usepackage{color}
+\definecolor{codebg}{gray}{0.85}
+
+\usepackage{listings} % https://de.sharelatex.com/learn/Code_listing
+\lstMakeShortInline[basicstyle=\small\ttfamily\color{blue}]|
+
+\lstset{keywordstyle=\sffamily\color{red},language=C}
+\def\inliner{\lstinline[basicstyle=\ttfamily,language=R,keywordstyle={}]} % http://tex.stackexchange.com/questions/44702/can-you-change-lstinline-without-changing-the-global-lstset
+
+% http://tex.stackexchange.com/questions/215520/output-from-tree-command-in-a-listing
+\usepackage{dirtree} % http://tug.ctan.org/macros/generic/dirtree/dirtree.pdf
+
+\lstdefinestyle{tree}{
+    literate=
+    {├}{{\smash{\raisebox{-1ex}{\rule{1pt}{\baselineskip}}}\raisebox{0.5ex}{\rule{1ex}{1pt}}}}1 
+    {─}{{\raisebox{0.5ex}{\rule{1.5ex}{1pt}}}}1 
+    {└}{{\smash{\raisebox{0.5ex}{\rule{1pt}{\dimexpr\baselineskip-1.5ex}}}\raisebox{0.5ex}{\rule{1ex}{1pt}}}}1 
+}
+
+
+\newcommand{\R}{R}
+\def\Version#01{\def\version{0.1}}
+
+\title{Bag to never differ---a standard for archiving research data and code with containers}
+%\title{Bagtainer Specification}
+\author{Daniel Nüst, o2r Team}
+\date{February 2016\\ \versionnumber}
+
+\begin{document}
+
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Bagtainers is the working title for an implementation of the idea of executable research containers (ERC) in the context of the DFG research project Opening Reproducible Research (o2r, \url{http://o2r.info}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Concept}
+
+The bagtainer specification is inspired by two approaches to improve development and operation of software.
+
+First, "convention over configuration", see \url{https://en.wikipedia.org/wiki/Convention_over_configuration}, e.g. as practiced in \href{https://books.sonatype.com/mvnref-book/reference/installation-sect-conventionConfiguration.html}{Maven}.
+
+Second, "DevOps", see Boettiger and \url{https://en.wikipedia.org/wiki/DevOps}.
+
+The goal is to create a directory structure with default file names and sensible defaults for settings that require only minimal configuration in 80\% of the cases, while allowing to override each of the settings if need be.
+For example, the main command to compile the text manuscript in a bagtainer could be \inliner{knitr::knit("paper.*")}, with \texttt{*} being replaced by the extension of the first file named \texttt{paper}. This covers many of the potential file formats such as \texttt{Rnw} or \texttt{Rmarkdown} with the default formats. However, if a user wants to use \inliner{rmarkdown::render(..)} on a file named \texttt{publication.md}, then the default behaviour can be overwritten.
+
+\subsection{How to interact with a bagtainer?}
+
+The interaction steps with a bagtainer to (re-)run the contained analysis are as follows:
+
+\begin{enumerate}
+    \item (if compressed) open the bag
+    \item execute the container
+    \item (automatically) compare the output contained in the bag with the just created new output
+\end{enumerate}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Specification}
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in \href{http://tools.ietf.org/html/rfc2119}{RFC2119}.
+
+\subsection{Directory structure}
+
+\dirtree{%
+.1 0001.
+.2 tagmanifest-md5.txt.
+.2 manifest-md5.txt.
+.2 bag-info.txt.
+.2 bagit.txt.
+.2 data.
+.3 Bagtainerfile.
+.3 input.
+.4 Bagtainer.R.
+.4 paper.Rnw.
+.3 output.
+.3 container.
+.4 Dockerfile.
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Examples}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Tools}
+
+\subsection{How to use a bagtainer from \R{}}
+
+The  R package \texttt{bagtainer} provides the following commands to build, run, and compare bagtainers.
+
+\begin{enumerate}
+    \item \colorbox{codebg}{\inliner{initialize()}} creates the directory structure of the bagtainer, including the required Dockerfile with the required dependencies
+    \item 
+\end{enumerate}
+
+\subsection{How to use a bagtainer from \texttt{\$}}
+
+We could provide bash scripts to execute containers.
+
+\subsection{How to use a bagtainer in the cloud/the o2r web applications?}
+
+
+\section{Random notes}
+
+Execute ERC from R, node, oder from bash!
+Bagordner "container", per default werden alle Dateien darin als Dockercontainer gestartet und mit dem Standardverzeichnis "input" als ÜbergabeParameter gestartet
+
+Default Backerfile enrhält die standardKommandos die überschrieben werden können, beliebige VMs können gestartet werden
+
+Backerfile muss so heißen und ist YAML
+
+Must a bagtainer contain license information? It should be possible to put it in the semantic metadata
+
+Spec could contain recommendations for bagtainers, such as adding a human readable readme with info about alle the files in the data folder
+
+What about "Geoboxes" (similar to Belmann et al's Bioboxes) ?
+
+self-coherent bagtainers vs. tools around the containers, data outside the containers, ...
+pro "data outside containers": hashes, compatible with GitBag-light, ...
+ 
+
+\section{Out of scope}
+
+writing good documentation of the included data set/analysis/workflow
+
+
+\end{document}
