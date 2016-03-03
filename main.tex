@@ -1,13 +1,23 @@
-\documentclass[twoside,a4paper]{refart}
-%\documentclass[pagesize,twoside,a5paper,smallborder,10pt]{refart}
+\documentclass[twoside,a4paper,draft]{refart}
 
+% refman:
+%\documentclass[pagesize,twoside,a5paper,smallborder,10pt]{refart}
 % example: https://de.sharelatex.com/project/56d7250dc2b46eb00522b9c6
+
+
+% tlmgr --gui
+
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage[]{hyperref}
+\usepackage{comment}
 \usepackage{color}
 \definecolor{codebg}{gray}{0.85}
+\definecolor{exmpl}{rgb}{.88,.80,.32}
+\definecolor{exmplbg}{rgb}{.99,.98,.93}
+\definecolor{note}{rgb}{.32,.88,.32}
+\definecolor{notebg}{rgb}{.91,.98,.91}
 
 \usepackage{listings} % https://de.sharelatex.com/learn/Code_listing
 \lstMakeShortInline[basicstyle=\small\ttfamily\color{blue}]|
@@ -17,7 +27,6 @@
 
 % http://tex.stackexchange.com/questions/215520/output-from-tree-command-in-a-listing
 \usepackage{dirtree} % http://tug.ctan.org/macros/generic/dirtree/dirtree.pdf
-
 \lstdefinestyle{tree}{
     literate=
     {├}{{\smash{\raisebox{-1ex}{\rule{1pt}{\baselineskip}}}\raisebox{0.5ex}{\rule{1ex}{1pt}}}}1 
@@ -27,12 +36,34 @@
 
 
 \newcommand{\R}{R}
-\def\Version#01{\def\version{0.1}}
+\providecommand{\specversion}{0.1}
+
+% http://tex.stackexchange.com/questions/10085/colored-fancy-boxes
+% mdframed or tcolorbox? > tcolorbox cannot compile the document anymore
+% http://mirror.unl.edu/ctan/macros/latex/contrib/tcolorbox/tcolorbox.pdf
+\usepackage[]{mdframed}
+% ftp://ftp.rrzn.uni-hannover.de/pub/mirror/tex-archive/macros/latex/contrib/mdframed/mdframed.pdf
+
+%\mdfdefinestyle{mystyle}{leftmargin=1cm,linecolor=blue}
+%\newmdenv[frametitle=Example,style=mystyle]{example}
+%\newmdenv[linecolor=note,frametitle=Note]{note}
+
+\mdfdefinestyle{theoremstyle}{%
+    linewidth=5pt,%
+    frametitlerule=false,%
+    topline=false,bottomline=false,rightline=false,
+    innertopmargin=.2\topskip,
+    frametitlebelowskip=.2\topskip,
+    skipabove=\topskip,
+    skipbelow=\topskip
+}
+\mdtheorem[style=theoremstyle,linecolor=note,backgroundcolor=notebg]{note}{Note}
+\mdtheorem[style=theoremstyle,linecolor=exmpl,backgroundcolor=exmplbg]{exmpl}{Example}
 
 \title{Bag to never differ---a standard for archiving research data and code with containers}
 %\title{Bagtainer Specification}
 \author{Daniel Nüst, o2r Team}
-\date{February 2016\\ \versionnumber}
+\date{February 2016\\ \vspace{1em}Version \specversion}
 
 \begin{document}
 
@@ -50,11 +81,12 @@ Bagtainers is the working title for an implementation of the idea of executable 
 
 The bagtainer specification is inspired by two approaches to improve development and operation of software.
 
-First, "convention over configuration", see \url{https://en.wikipedia.org/wiki/Convention_over_configuration}, e.g. as practiced in \href{https://books.sonatype.com/mvnref-book/reference/installation-sect-conventionConfiguration.html}{Maven}.
+First, "convention over configuration"\footnote{\url{https://en.wikipedia.org/wiki/Convention_over_configuration}}, e.g. as practiced in the Java build tool \href{https://maven.apache.org/what-is-maven.html}{Maven}\footnote{\url{https://books.sonatype.com/mvnref-book/reference/installation-sect-conventionConfiguration.html}}.
 
 Second, "DevOps", see Boettiger and \url{https://en.wikipedia.org/wiki/DevOps}.
 
-The goal is to create a directory structure with default file names and sensible defaults for settings that require only minimal configuration in 80\% of the cases, while allowing to override each of the settings if need be.
+In following these guidelines this specification also makes sure to fit well with the concrete standards and technologies that it is based on, namely the Internet-Draft BagIt (ref!) and Docker. We want to create a directory structure with default file names and sensible defaults for settings that require only minimal configuration in 80\% of the cases, while allowing to override each of the settings if need be and proving full customizability in the remaining 20\%.
+
 For example, the main command to compile the text manuscript in a bagtainer could be \inliner{knitr::knit("paper.*")}, with \texttt{*} being replaced by the extension of the first file named \texttt{paper}. This covers many of the potential file formats such as \texttt{Rnw} or \texttt{Rmarkdown} with the default formats. However, if a user wants to use \inliner{rmarkdown::render(..)} on a file named \texttt{publication.md}, then the default behaviour can be overwritten.
 
 \subsection{How to interact with a bagtainer?}
@@ -70,8 +102,6 @@ The interaction steps with a bagtainer to (re-)run the contained analysis are as
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in \href{http://tools.ietf.org/html/rfc2119}{RFC2119}.
 
 \subsection{Directory structure}
 
@@ -91,9 +121,27 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 .4 Dockerfile.
 }
 
+\subsection{Conformance\footnote{Wording as well as styling based on \url{https://w3ctag.github.io/design-principles/#conformance}}}
+
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in the normative parts of this document are to be interpreted as described in \href{http://tools.ietf.org/html/rfc2119}{RFC 2119}. However, for readability, these words do not appear in all uppercase letters in this specification.
+
+All of the text of this specification is normative except sections explicitly marked as non-normative, examples, and notes.
+
+Examples in this specification are introduced with the words “for example” or are set apart from the normative text with class="example", like this:
+
+\begin{exmpl*}
+This is an example of an informative example.
+\end{exmpl}
+
+Informative notes begin with the word “Note” and are set apart from the normative text with class="note", like this:
+
+\begin{note*}
+Note, this is an informative note. 
+\end{note}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Examples}
+\section{Example use cases}
 
 
 
